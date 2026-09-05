@@ -16,6 +16,7 @@ function Home() {
   return (
     <>
       <Hero />
+
       <LogoMarquee />
       <Stats />
       <Services />

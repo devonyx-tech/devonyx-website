@@ -8,18 +8,19 @@ import {
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 
-import PostHogProvider from '../integrations/posthog/provider'
+import PostHogProvider from '@/integrations/posthog/provider'
 
-import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
+import TanStackQueryDevtools from '@/integrations/tanstack-query/devtools'
 
 import { getLocale } from '#/paraglide/runtime'
 
-import appCss from '../styles.css?url'
+import appCss from '@/styles.css?url'
 
 import type { QueryClient } from '@tanstack/react-query'
 
 import Header from '../components/Header'
 import Footer from '../components/Footer'
+import Booker from '#/components/Book'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -54,6 +55,10 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         rel: 'stylesheet',
         href: appCss,
       },
+      {
+        rel: 'stylesheet',
+        href: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300;1,9..144,400;1,9..144,500&family=IBM+Plex+Mono:wght@400;500&display=swap',
+      },
     ],
   }),
   shellComponent: RootDocument,
@@ -69,6 +74,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <PostHogProvider>
           <Header />
           <main>{children}</main>
+          <Booker />
           <Footer />
           <TanStackDevtools
             config={{
