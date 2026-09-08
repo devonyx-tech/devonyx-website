@@ -1,3 +1,3 @@
-import { Route as BlogRoute } from '@/components/Blog'
+import { Route as BlogRoute } from "@/components/Blog";
 
-export const Route = BlogRoute
+export const Route = BlogRoute;
