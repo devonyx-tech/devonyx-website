@@ -13,7 +13,7 @@ export default function Logo({ className = '' }: { className?: string }) {
       className={`group inline-flex items-center gap-2.5 ${className}`}
     >
       <span className="relative flex h-9 w-9 items-center justify-center">
-        <svg viewBox="0 0 64 64" className="h-9 w-9">
+        <svg viewBox="0 0 64 64" className="h-9 w-9" aria-label="Devonyx logo">
           <defs>
             <linearGradient id="logoGradient" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
               <stop offset="0" stopColor="#2B4BFF" />

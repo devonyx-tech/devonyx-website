@@ -193,6 +193,7 @@ export default function Pricing() {
           <div className="mx-auto mt-10 flex w-fit flex-wrap justify-center gap-2 rounded-full border border-hairline bg-surface p-1.5">
             {tabs.map((tab) => (
               <button
+                type="button"
                 key={tab.id}
                 onClick={() => setActive(tab.id)}
                 className={`rounded-full px-6 py-2.5 text-sm font-semibold transition-colors ${

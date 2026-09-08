@@ -1,6 +1,6 @@
-import { ArrowLeft, ArrowUpRight, CalendarDays, FileText } from 'lucide-react'
+import { ArrowLeft, ArrowUpRight, CalendarDays } from 'lucide-react'
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { Reveal } from '../hooks'
+import { Reveal } from '@/hooks'
 import { getPostsFn } from '@/lib/server-functions'
 
 function formatDate(d: string | undefined) {
@@ -11,7 +11,21 @@ function formatDate(d: string | undefined) {
 }
 
 // ---- Normalize a post object from the API (supports both our fields and the server's) ----
-function normalizePost(p: any) {
+interface PostInput {
+  id: string
+  slug?: string
+  title?: string
+  name?: string
+  date?: string
+  description?: string
+  seoTitle?: string
+  tags?: unknown
+  cover?: string | null
+  published?: boolean
+  blocks?: unknown
+}
+
+function normalizePost(p: PostInput) {
   return {
     id: p.id,
     slug: p.slug || p.id,
@@ -30,7 +44,7 @@ function normalizePost(p: any) {
 function RichText({ value }: { value: Array<{ plain_text: string; annotations?: Record<string, unknown>; href?: string }> }) {
   return (
     <>
-      {(value || []).map((t, i) => {
+      {(value || []).map((t) => {
         const { annotations = {}, href } = t
         let node: React.ReactNode = <>{t.plain_text}</>
         if (href) {
@@ -45,20 +59,20 @@ function RichText({ value }: { value: Array<{ plain_text: string; annotations?: 
         if (annotations.underline) node = <u>{node}</u>
         if (annotations.strikethrough) node = <del>{node}</del>
         if (annotations.code) node = <code>{node}</code>
-        return <span key={i}>{node}</span>
+        return <span key={t.plain_text + (t.href || '')}>{node}</span>
       })}
     </>
   )
 }
 
 // ---- Convert Notion blocks + children into React elements ----
-function Blocks({ blocks, depth = 0 }: { blocks: Array<Record<string, unknown>>; depth?: number }) {
+function _Blocks({ blocks, depth = 0 }: { blocks: Array<Record<string, unknown>>; depth?: number }) {
   if (!blocks || blocks.length === 0 || depth > 4) return null
 
   return (
     <div className={depth === 0 ? 'mt-2' : ''}>
       {blocks.map((block) => {
-        const children = block.has_children ? <Blocks blocks={(block.children || []) as Array<Record<string, unknown>>} depth={depth + 1} /> : null
+        const children = block.has_children ? <_Blocks blocks={(block.children || []) as Array<Record<string, unknown>>} depth={depth + 1} key={block.id} /> : null
         const rt = (b: Record<string, unknown>) => (b?.rich_text as Array<{ plain_text: string; annotations?: Record<string, unknown>; href?: string }>) || []
         switch (block.type) {
           case 'paragraph':
@@ -190,7 +204,20 @@ function PostCard({ p }: { p: ReturnType<typeof normalizePost> }) {
   )
 }
 
-function BlogList({ posts }: { posts: any[] }) {
+interface Post {
+  id: string
+  slug: string
+  title: string
+  date: string
+  description: string
+  seoTitle: string
+  tags: string[]
+  cover: string | null
+  published: boolean
+  blocks?: Array<Record<string, unknown>>
+}
+
+function BlogList({ posts }: { posts: Post[] }) {
   return (
     <div className="mt-12">
       {!posts || posts.length === 0 ? (
@@ -199,7 +226,7 @@ function BlogList({ posts }: { posts: any[] }) {
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {posts.map((p, i) => (
+          {posts.map((p) => (
             <PostCard key={p.id} p={normalizePost(p)} />
           ))}
         </div>

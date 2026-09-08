@@ -85,8 +85,8 @@ export default function Hero() {
                 </div>
                 <div>
                   <div className="flex items-center gap-1 text-accent">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <span key={i} className="text-sm">★</span>
+                    {['star1', 'star2', 'star3', 'star4', 'star5'].map((id) => (
+                      <span key={id} className="text-sm">★</span>
                     ))}
                   </div>
                   <p className="mt-1.5 text-sm text-ink-muted">
@@ -219,7 +219,7 @@ function BarChart() {
           <path d={line} fill="none" stroke="#2B4BFF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
         <div className="relative flex h-28 items-end gap-1.5">
-          {data.map((d, i) => (
+          {data.map((d) => (
             <div key={d.m} className="group relative flex-1">
               <div
                 className="w-full rounded-t bg-brand/85 transition-colors group-hover:bg-brand"

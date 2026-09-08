@@ -175,8 +175,8 @@ function ProjectChart({ bars, color }: { bars: number[]; color: string }) {
         <path d={line} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
       <div className="relative flex h-20 items-end gap-1.5">
-        {bars.map((b, i) => (
-          <div key={i} className="flex-1 rounded-t bg-black/5"
+        {bars.map((b, _i) => (
+          <div key={`bar-${b}`} className="flex-1 rounded-t bg-black/5"
             style={{ height: `${b}%` }}
           />
         ))}

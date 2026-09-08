@@ -1,6 +1,5 @@
 import { ArrowLeft, CalendarDays, FileText } from 'lucide-react'
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { Reveal } from '../../hooks'
 import { getPostFn } from '../../lib/server-functions'
 
 function formatDate(d: string | undefined) {
@@ -14,7 +13,7 @@ function formatDate(d: string | undefined) {
 function RichText({ value }: { value: Array<{ plain_text: string; annotations?: Record<string, unknown>; href?: string }> }) {
   return (
     <>
-      {(value || []).map((t, i) => {
+      {(value || []).map((t) => {
         const { annotations = {}, href } = t
         let node: React.ReactNode = <>{t.plain_text}</>
         if (href) {
@@ -29,7 +28,7 @@ function RichText({ value }: { value: Array<{ plain_text: string; annotations?: 
         if (annotations.underline) node = <u>{node}</u>
         if (annotations.strikethrough) node = <del>{node}</del>
         if (annotations.code) node = <code>{node}</code>
-        return <span key={i}>{node}</span>
+        return <span key={t.plain_text + (t.href || '')}>{node}</span>
       })}
     </>
   )
@@ -42,7 +41,7 @@ function Blocks({ blocks, depth = 0 }: { blocks: Array<Record<string, unknown>>;
   return (
     <div className={depth === 0 ? 'mt-2' : ''}>
       {blocks.map((block) => {
-        const children = block.has_children ? <Blocks blocks={(block.children || []) as Array<Record<string, unknown>>} depth={depth + 1} /> : null
+        const children = block.has_children ? <Blocks blocks={(block.children || []) as Array<Record<string, unknown>>} depth={depth + 1} key={block.id} /> : null
         const rt = (b: Record<string, unknown>) => (b?.rich_text as Array<{ plain_text: string; annotations?: Record<string, unknown>; href?: string }>) || []
         switch (block.type) {
           case 'paragraph':

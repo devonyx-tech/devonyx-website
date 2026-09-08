@@ -144,7 +144,7 @@ export default function Footer() {
           <p className="text-xs text-white/50">© {new Date().getFullYear()} Devonyx. All rights reserved.</p>
           <div className="flex flex-wrap items-center justify-center gap-6">
             {['Privacy Policy', 'Terms of Service', 'Cookie Policy'].map((link) => (
-              <a key={link} href="#" className="text-xs text-white/50 transition-colors hover:text-white">
+              <a key={link} href="/legal" className="text-xs text-white/50 transition-colors hover:text-white">
                 {link}
               </a>
             ))}

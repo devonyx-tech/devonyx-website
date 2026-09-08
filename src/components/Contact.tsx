@@ -35,7 +35,7 @@ export default function Contact() {
       setStatus('success')
       setSubmitted(true)
       form.reset()
-    } catch (err) {
+    } catch (_err) {
       setStatus('error')
     }
   }
@@ -102,6 +102,7 @@ export default function Contact() {
                     within 24 hours at the email you provided.
                   </p>
                   <button
+                    type="button"
                     onClick={() => setSubmitted(false)}
                     className="mt-6 text-sm font-semibold text-brand-dark hover:text-brand"
                   >

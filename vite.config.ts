@@ -8,7 +8,7 @@ import viteReact, { reactCompilerPreset } from '@vitejs/plugin-react'
 import babel from '@rolldown/plugin-babel'
 import tailwindcss from '@tailwindcss/vite'
 import { nitro } from 'nitro/vite'
-import netlify from '@netlify/vite-plugin-tanstack-start'
+// import netlify from '@netlify/vite-plugin-tanstack-start'
 
 
 const config = defineConfig({
@@ -25,7 +25,7 @@ const config = defineConfig({
     tanstackStart(),
     viteReact(),
     babel({ presets: [reactCompilerPreset()] }),
-    netlify(),
+    // netlify(),
   ],
 })
 

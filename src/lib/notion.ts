@@ -12,7 +12,11 @@ export function plainText(arr = []) {
   return arr.map((t) => t.plain_text).join("");
 }
 
-export function coverUrl(coverProp: any) {
+interface CoverProp {
+  files?: Array<{ type: string; external?: { url: string }; file?: { url: string } }>;
+}
+
+export function coverUrl(coverProp: CoverProp | null | undefined) {
   const f = coverProp?.files?.[0];
   if (!f) return null;
   if (f.type === "external") return f.external.url;
@@ -20,7 +24,13 @@ export function coverUrl(coverProp: any) {
   return null;
 }
 
-export function mapPost(page: any) {
+interface NotionPage {
+  id: string;
+  properties: Record<string, unknown>;
+  last_edited_time: string;
+}
+
+export function mapPost(page: NotionPage) {
   const p = page.properties;
 
   return {
@@ -32,7 +42,7 @@ export function mapPost(page: any) {
     date: p.Date?.date?.start ?? null,
     description: plainText(p.Description?.rich_text),
     seoTitle: plainText(p["SEO Title"]?.rich_text),
-    tags: (p.Tags?.multi_select ?? []).map((t: any) => t.name),
+    tags: (p.Tags?.multi_select ?? []).map((t: { name: string }) => t.name),
     cover: coverUrl(p.Cover),
     lastEditedTime: page.last_edited_time,
   };
@@ -80,7 +90,7 @@ export async function getPost(slug: string) {
   if (!page) return null;
 
   // Fetch all page content blocks (handle pagination)
-  let allBlocks: any[] = [];
+  let allBlocks: Array<Record<string, unknown>> = [];
   let startCursor: string | undefined;
   do {
     const r = await notion.blocks.children.list({

@@ -54,7 +54,7 @@ export default function Career() {
       setStatus('success')
       setSubmitted(true)
       form.reset()
-    } catch (err) {
+    } catch (_err) {
       setStatus('error')
     }
   }
@@ -83,6 +83,7 @@ export default function Career() {
           <div className="flex flex-col gap-4">
             {roles.map((role) => (
               <button
+                type="button"
                 key={role.title}
                 onClick={() => setSelected(role.title)}
                 className={`group text-left rounded-2xl border p-6 transition-all ${

@@ -10,8 +10,7 @@ const navLinks = [
   { label: 'About', href: '#about' },
   { label: 'Pricing', href: '#pricing' },
   { label: 'Blog', href: '/blog', external: true },
-  { label: 'Careers', href: '/careers', external: true },
-  { label: 'Contact', href: '#contact' },
+  // { label: 'Careers', href: '/careers', external: true },
 ]
 
 export default function Header() {
@@ -29,7 +28,7 @@ export default function Header() {
 
   useEffect(() => {
     setOpen(false)
-  }, [location])
+  }, [])
 
   const goTo = (href: string) => {
     if (href.startsWith('#')) {
@@ -93,16 +92,18 @@ export default function Header() {
             </Link>
           ) : (
             <button
+              type="button"
               onClick={() => document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' })}
               className="inline-flex items-center gap-2 rounded-full bg-brand-gradient px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand/25 transition-all hover:shadow-xl hover:shadow-brand/35 hover:brightness-110"
             >
               <CalendarCheck className="h-4 w-4" />
-              Book a Free Consultation
+              Inquire Now
             </button>
           )}
         </div>
 
         <button
+          type="button"
           onClick={() => setOpen(!open)}
           className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-ink lg:hidden"
           aria-label="Toggle menu"
