@@ -1,5 +1,6 @@
 import { ArrowRight, ShieldCheck, Globe2 } from "lucide-react";
 import { Reveal } from "../hooks";
+import { motion } from "framer-motion";
 
 const clientRegions = ["USA", "UAE", "Netherlands", "New Zealand", "India"];
 
@@ -178,19 +179,27 @@ function HeroPanel() {
 				</div>
 			</div>
 
-			<div className="absolute -bottom-6 -left-8 animate-float rounded-2xl border border-hairline bg-surface px-5 py-4 shadow-xl shadow-black/8">
+			<motion.div
+				className="absolute -bottom-6 -left-8 rounded-2xl border border-hairline bg-surface px-5 py-4 shadow-xl shadow-black/8"
+				animate={{ y: [-10, 10, -10] }}
+				transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+			>
 				<p className="font-mono text-xs uppercase tracking-wide text-ink-muted">
 					SaaS Product Launched
 				</p>
 				<p className="font-display text-xl font-medium text-ink">in 6 weeks</p>
-			</div>
+			</motion.div>
 
-			<div className="absolute -top-6 -right-6 animate-float-slow rounded-2xl border border-hairline bg-surface px-5 py-4 shadow-xl shadow-black/8">
+			<motion.div
+				className="absolute -top-6 -right-6 rounded-2xl border border-hairline bg-surface px-5 py-4 shadow-xl shadow-black/8"
+				animate={{ y: [10, -10, 10], rotate: [-2, 2, -2] }}
+				transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+			>
 				<p className="font-mono text-xs uppercase tracking-wide text-ink-muted">
 					Monthly Revenue
 				</p>
 				<p className="font-display text-xl font-medium text-gradient">+$48K</p>
-			</div>
+			</motion.div>
 		</div>
 	);
 }

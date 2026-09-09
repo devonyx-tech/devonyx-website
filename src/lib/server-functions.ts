@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getPosts, getPost } from "./notion";
+import { getPosts, getPost, getCareerJobs, getProjects } from "./notion";
 
 export const getPostsFn = createServerFn({ method: "GET" }).handler(
 	async () => {
@@ -16,3 +16,15 @@ export const getPostFn = createServerFn({ method: "GET" })
 		}
 		return post;
 	});
+
+export const getCareerJobsFn = createServerFn({ method: "GET" }).handler(
+	async () => {
+		return getCareerJobs();
+	},
+);
+
+export const getProjectsFn = createServerFn({ method: "GET" }).handler(
+	async () => {
+		return getProjects();
+	},
+);

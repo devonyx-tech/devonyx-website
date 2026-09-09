@@ -27,9 +27,10 @@ const serviceLinks = [
 
 const companyLinks = [
 	{ label: "About Us", href: "#about" },
+	{ label: "Projects", href: "/projects" },
 	{ label: "Our Work", href: "#work" },
 	{ label: "Process", href: "#process" },
-	{ label: "Pricing", href: "#pricing" },
+	{ label: "Pricing", href: "/pricing" },
 	{ label: "Blog", href: "/blog" },
 	{ label: "Careers", href: "/careers" },
 	{ label: "Get a Quote", href: "#contact" },
