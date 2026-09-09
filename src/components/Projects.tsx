@@ -1,16 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
+	ArrowRight,
 	ArrowUpRight,
-	Calendar,
-	Circle,
-	Code,
 	ExternalLink,
 	Github,
 	Image,
-	Palette,
+	Layers,
 	Rocket,
-	Tag,
-	TrendingUp,
 } from "lucide-react";
 import {
 	motion,
@@ -19,7 +15,7 @@ import {
 	useScroll,
 	useTransform,
 } from "motion/react";
-import { Suspense, useRef } from "react";
+import { Suspense, useMemo, useRef, useState } from "react";
 import type { ProjectItem } from "@/lib/notion";
 import { getProjectsFn } from "@/lib/server-functions";
 import { Reveal } from "../hooks";
@@ -76,277 +72,250 @@ function ParallaxOrbs() {
 	);
 }
 
-function ProjectCardSkeleton() {
-	return (
-		<div className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-hairline bg-surface">
-			<div className="relative h-72 overflow-hidden">
-				<div className="absolute inset-0 animate-pulse bg-gradient-to-r from-ink/5 via-ink/10 to-ink/5" />
-			</div>
-			<div className="flex flex-1 flex-col p-6 space-y-4">
-				<div className="h-6 w-3/4 rounded bg-ink/5 animate-pulse" />
-				<div className="h-4 w-full rounded bg-ink/5 animate-pulse" />
-				<div className="h-4 w-2/3 rounded bg-ink/5 animate-pulse" />
-				<div className="h-4 w-1/2 rounded bg-ink/5 animate-pulse mt-auto" />
-			</div>
-		</div>
-	);
-}
-
 const categoryConfig: Record<
 	string,
 	{
 		icon: React.ComponentType<{ className?: string }>;
 		gradient: string;
-		label: string;
+		soft: string;
 	}
 > = {
-	Build: { icon: Rocket, gradient: "from-brand to-brand-dark", label: "Build" },
-	Grow: {
-		icon: TrendingUp,
-		gradient: "from-[#7C6BFF] to-brand",
-		label: "Grow",
+	Build: {
+		icon: Rocket,
+		gradient: "from-brand to-brand-dark",
+		soft: "from-brand/20 to-brand/5",
 	},
-	Brand: { icon: Palette, gradient: "from-accent to-brand", label: "Brand" },
+	Grow: {
+		icon: Rocket,
+		gradient: "from-[#7C6BFF] to-brand",
+		soft: "from-[#7C6BFF]/20 to-brand/5",
+	},
+	Brand: {
+		icon: Layers,
+		gradient: "from-accent to-brand",
+		soft: "from-accent/20 to-brand/5",
+	},
 	Research: {
-		icon: Code,
+		icon: Layers,
 		gradient: "from-violet-500 to-purple-600",
-		label: "Research",
+		soft: "from-violet-500/20 to-purple-600/5",
 	},
 	Design: {
-		icon: Palette,
+		icon: Layers,
 		gradient: "from-pink-500 to-rose-500",
-		label: "Design",
+		soft: "from-pink-500/20 to-rose-500/5",
 	},
 	Engineering: {
 		icon: Rocket,
 		gradient: "from-emerald-500 to-teal-600",
-		label: "Engineering",
+		soft: "from-emerald-500/20 to-teal-600/5",
 	},
 };
 
-const priorityColors: Record<string, string> = {
-	High: "bg-red-500/20 text-red-400 border-red-500/30",
-	Medium: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-	Low: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-	Critical: "bg-red-600/20 text-red-300 border-red-600/30",
-};
+const FILTERS = [
+	"All",
+	"Build",
+	"Grow",
+	"Brand",
+	"Research",
+	"Design",
+	"Engineering",
+];
 
-function ProjectCard({
+function configFor(category: string) {
+	return categoryConfig[category] || categoryConfig.Build;
+}
+
+function categoryLabel(category: string) {
+	return category || "Project";
+}
+
+/* Continuous name ticker — adds constant, effortless motion to the page. */
+function ProjectMarquee({ projects }: { projects: ProjectItem[] }) {
+	if (projects.length === 0) return null;
+	const items = [0, 1, 2].flatMap((copy) =>
+		projects.map((p) => ({ copy, project: p })),
+	);
+
+	return (
+		<div
+			className="relative -mx-6 overflow-hidden py-10 lg:-mx-10"
+			style={{
+				maskImage:
+					"linear-gradient(to right, transparent, black 12%, black 88%, transparent)",
+			}}
+			aria-hidden="true"
+		>
+			<div className="flex w-max animate-marquee items-center gap-10">
+				{items.map(({ copy, project }) => {
+					const config = configFor(project.category);
+					return (
+						<span
+							key={`${project.id}-${copy}`}
+							className="flex items-center gap-3 whitespace-nowrap"
+						>
+							<span
+								className={`inline-block h-2.5 w-2.5 rounded-full bg-linear-to-br ${config.gradient}`}
+							/>
+							<span className="font-display text-3xl font-medium text-ink/15 transition-colors hover:text-ink/30 md:text-5xl">
+								{project.name}
+							</span>
+						</span>
+					);
+				})}
+			</div>
+		</div>
+	);
+}
+
+/* Full-bleed image panel — the cover image IS the panel. */
+function ProjectRow({
 	project,
 	index,
 }: {
 	project: ProjectItem;
 	index: number;
 }) {
-	const config = categoryConfig[project.category] || categoryConfig.Build;
-	const Icon = config.icon;
-
-	const coverRef = useRef<HTMLDivElement>(null);
+	const imgRef = useRef<HTMLDivElement>(null);
 	const reduce = useReducedMotion();
 	const zeroPct = useMotionValue("0%");
 	const { scrollYProgress } = useScroll({
-		target: coverRef,
+		target: imgRef,
 		offset: ["start end", "end start"],
 	});
 	const imgY = useTransform(scrollYProgress, [0, 1], ["-14%", "14%"]);
 	const parallaxY = reduce ? zeroPct : imgY;
+	const config = configFor(project.category);
 
 	return (
-		<motion.article
-			key={project.id}
-			initial={{ opacity: 0, y: 40, scale: 0.98 }}
-			animate={{ opacity: 1, y: 0, scale: 1 }}
-			transition={{
-				duration: 0.6,
-				delay: index * 0.08,
-				ease: [0.25, 0.46, 0.45, 0.94],
-			}}
-			whileHover={{ y: -8 }}
-			className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-hairline bg-surface transition-shadow duration-500 hover:shadow-2xl hover:shadow-brand/10"
+		<motion.div
+			initial={{ opacity: 0, y: 48 }}
+			whileInView={{ opacity: 1, y: 0 }}
+			viewport={{ once: true, margin: "-60px" }}
+			transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
+			className="group relative"
 		>
-			{project.coverImage && (
-				<div ref={coverRef} className="relative h-72 overflow-hidden">
+			<div
+				ref={imgRef}
+				className="relative h-[22rem] overflow-hidden rounded-[2rem] border border-hairline sm:h-[26rem] md:h-[30rem]"
+			>
+				{/* Full-bleed image */}
+				{project.coverImage ? (
 					<motion.div
-						className="absolute inset-x-0 -top-[14%] h-[128%]"
+						className="absolute inset-x-0 -top-[15%] h-[130%]"
 						style={{ y: parallaxY }}
 					>
 						<img
 							src={project.coverImage}
 							alt={project.name}
-							className="h-full w-full object-cover"
 							loading="lazy"
+							className="h-full w-full object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-110"
 						/>
 					</motion.div>
-					<div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-					<div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_50%,_black/40_100%)]" />
-					<div className="absolute inset-0 translate-y-2 bg-linear-to-r from-white/0 via-white/5 to-white/0 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100" />
-					<div className="absolute bottom-4 left-4 right-4 flex flex-wrap items-center justify-between gap-3">
+				) : (
+					<div
+						className={`absolute inset-0 bg-linear-to-br ${config.gradient}`}
+					>
 						<div
-							className={`flex items-center gap-2 rounded-full bg-linear-to-r ${config.gradient} px-3 py-1 text-xs font-semibold text-white shadow-lg`}
-						>
-							<Icon className="h-4 w-4" />
-							{config.label}
-						</div>
-						{project.priority && (
-							<span
-								className={`rounded-full border px-2.5 py-1 text-xs font-mono font-medium ${
-									priorityColors[project.priority] ||
-									"bg-ink/10 text-ink/50 border-hairline"
-								}`}
-							>
-								{project.priority}
-							</span>
-						)}
-					</div>
-					{project.images.length > 1 && (
-						<div className="absolute top-4 right-4">
-							<button
-								type="button"
-								className="flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur transition-all hover:scale-110 hover:bg-black/70"
-								aria-label="View gallery"
-							>
-								<Image className="h-4.5 w-4.5" />
-							</button>
-						</div>
-					)}
-				</div>
-			)}
-
-			<div className="flex flex-1 flex-col p-6 pt-4 space-y-4">
-				<div className="flex items-center justify-between">
-					<h3 className="pr-4 font-display text-xl font-medium text-ink transition-colors group-hover:text-brand">
-						{project.name}
-					</h3>
-					<div className="flex items-center gap-1.5">
-						{project.repoLink && (
-							<a
-								href={project.repoLink}
-								target="_blank"
-								rel="noopener noreferrer"
-								className="flex h-9 w-9 items-center justify-center rounded-xl border border-hairline bg-white/50 text-ink-soft transition-all hover:scale-110 hover:border-brand hover:bg-white hover:text-brand"
-								aria-label={`View ${project.name} on GitHub`}
-							>
-								<Github className="h-4.5 w-4.5" />
-							</a>
-						)}
-						{project.liveLink && (
-							<a
-								href={project.liveLink}
-								target="_blank"
-								rel="noopener noreferrer"
-								className="flex h-9 w-9 items-center justify-center rounded-xl border border-hairline bg-white/50 text-ink-soft transition-all hover:scale-110 hover:border-brand hover:bg-white hover:text-brand"
-								aria-label={`View ${project.name} live`}
-							>
-								<ExternalLink className="h-4.5 w-4.5" />
-							</a>
-						)}
-					</div>
-				</div>
-
-				<p className="line-clamp-3 flex-1 text-sm leading-relaxed text-ink-soft">
-					{project.notes || "No description available."}
-				</p>
-
-				{(project.category || project.status || project.dueDate) && (
-					<div className="flex flex-wrap items-center gap-2.5">
-						{project.category && (
-							<span className="flex items-center gap-1.5 rounded-full bg-brand/10 px-3 py-1 text-xs font-medium text-brand">
-								<Tag className="h-3 w-3" />
-								{project.category}
-							</span>
-						)}
-						{project.status && (
-							<span className="flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-100/20 px-3 py-1 text-xs font-medium text-emerald-400">
-								<Circle className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-								{project.status}
-							</span>
-						)}
-						{project.dueDate && (
-							<span className="flex items-center gap-1.5 rounded-full border border-amber-500/20 bg-amber-100/20 px-3 py-1 text-xs font-medium text-amber-400">
-								<Calendar className="h-3 w-3" />
-								Due:{" "}
-								{new Date(project.dueDate).toLocaleDateString("en-US", {
-									month: "short",
-									day: "numeric",
-								})}
-							</span>
-						)}
+							className={`absolute inset-0 bg-linear-to-br ${config.soft}`}
+						/>
 					</div>
 				)}
 
-				{project.images.length > 0 && (
-					<div className="relative h-24 overflow-hidden rounded-xl border border-hairline">
-						<div className="flex h-full gap-1 overflow-x-auto pb-2 scrollbar-hide">
-							{project.images.slice(0, 5).map((img) => (
-								<motion.img
-									key={`${project.id}-img-${img}`}
-									src={img}
-									alt={`${project.name} gallery`}
-									className="h-full w-32 flex-shrink-0 cursor-pointer rounded-lg object-cover transition-all duration-300 group-hover:scale-105"
-									loading="lazy"
-									whileHover={{ scale: 1.1, zIndex: 10 }}
-								/>
-							))}
-							{project.images.length > 5 && (
-								<div className="flex h-full w-32 flex-shrink-0 items-center justify-center rounded-lg bg-black/50 font-medium text-white">
-									+{project.images.length - 5}
+				{/* Resting overlay — lifts on hover so the full image shows */}
+				<div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/30 to-transparent transition-opacity duration-700 group-hover:opacity-40" />
+
+				{/* Big index number */}
+				<span className="absolute right-6 top-4 font-display text-6xl font-medium text-white/25 transition-all duration-500 group-hover:text-white/60 md:text-7xl">
+					{String(index + 1).padStart(2, "0")}
+				</span>
+
+				{/* Category chip */}
+				<div className="absolute left-5 top-5">
+					<span
+						className={`inline-flex items-center gap-1.5 rounded-full bg-linear-to-r ${config.gradient} px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white shadow-lg`}
+					>
+						<config.icon className="h-3.5 w-3.5" />
+						{categoryLabel(project.category)}
+					</span>
+				</div>
+
+				{/* Always-visible title + arrow */}
+				<div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-6 p-6 md:p-8">
+					<h3 className="max-w-2xl text-balance font-display text-3xl font-medium leading-tight text-white transition-colors duration-300 group-hover:text-white/0 md:text-5xl">
+						{project.name}
+					</h3>
+					<span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-white text-ink shadow-lg transition-all duration-300 group-hover:rotate-45 group-hover:bg-brand group-hover:text-white md:h-14 md:w-14">
+						<ArrowUpRight className="h-5 w-5 md:h-6 md:w-6" />
+					</span>
+				</div>
+
+				{/* Description slides up over the title on hover */}
+				<div className="absolute inset-x-0 bottom-0 p-6 md:p-8">
+					<motion.div
+						initial={false}
+						animate={{ opacity: 1, y: 0 }}
+						className="grid grid-rows-[0fr] opacity-0 transition-all duration-500 ease-out group-hover:grid-rows-[1fr] group-hover:opacity-100"
+					>
+						<div className="overflow-hidden">
+							<p className="max-w-2xl text-balance font-display text-3xl font-medium leading-tight text-white md:hidden">
+								{project.name}
+							</p>
+							<p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/85 md:mt-0 md:text-lg">
+								{project.notes || "No description available."}
+							</p>
+							{(project.repoLink || project.liveLink) && (
+								<div className="mt-5 flex flex-wrap items-center gap-3">
+									{project.liveLink && (
+										<a
+											href={project.liveLink}
+											target="_blank"
+											rel="noopener noreferrer"
+											className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-ink transition-colors hover:bg-brand hover:text-white"
+										>
+											<ExternalLink className="h-4 w-4" />
+											View Live
+											<ArrowUpRight className="h-3.5 w-3.5" />
+										</a>
+									)}
+									{project.repoLink && (
+										<a
+											href={project.repoLink}
+											target="_blank"
+											rel="noopener noreferrer"
+											className="inline-flex items-center gap-2 rounded-full border border-white/30 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur transition-colors hover:border-white hover:bg-white/10"
+										>
+											<Github className="h-4 w-4" />
+											View Code
+										</a>
+									)}
 								</div>
 							)}
 						</div>
-					</div>
-				)}
-
-				<div className="mt-auto flex flex-wrap items-center gap-2 border-t border-hairline pt-4">
-					<a
-						href={project.repoLink || project.liveLink || "#contact"}
-						className="inline-flex min-w-0 flex-1 items-center justify-center gap-2 rounded-full bg-ink-gradient px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-ink/20 transition-all hover:shadow-xl hover:shadow-ink/30 hover:brightness-125"
-					>
-						{project.repoLink
-							? "View Code"
-							: project.liveLink
-								? "View Live"
-								: "Inquire"}
-						<ArrowUpRight className="h-4 w-4" />
-					</a>
-					{project.images.length > 0 && (
-						<button
-							type="button"
-							className="inline-flex min-w-0 flex-1 items-center justify-center gap-2 rounded-full border border-hairline bg-surface px-5 py-2.5 text-sm font-semibold text-ink transition-all hover:border-brand hover:bg-white/50 hover:text-brand"
-						>
-							<Image className="h-4 w-4" />
-							Gallery
-						</button>
-					)}
+					</motion.div>
 				</div>
 			</div>
-		</motion.article>
+		</motion.div>
 	);
 }
 
-function ProjectGrid({ projects }: { projects: ProjectItem[] }) {
+function ProjectSkeleton() {
 	return (
-		<div className="relative">
-			<div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-				{projects.map((project, i) => (
-					<div
-						key={project.id}
-						className={[
-							i % 4 === 1 ? "md:mt-12 xl:mt-0" : "",
-							i % 4 === 2 ? "xl:mt-24" : "",
-							i % 4 === 3 ? "md:mt-12 xl:mt-12" : "",
-						].join(" ")}
-					>
-						<ProjectCard project={project} index={i} />
-					</div>
-				))}
-			</div>
-		</div>
+		<div className="h-[22rem] animate-pulse overflow-hidden rounded-[2rem] border border-hairline bg-linear-to-r from-ink/5 via-ink/10 to-ink/5 sm:h-[26rem]" />
 	);
 }
 
 function ProjectsPage() {
 	const { projects } = Route.useLoaderData();
 	const projectsArray = Array.isArray(projects) ? projects : [];
+	const [filter, setFilter] = useState("All");
+
+	const filtered = useMemo(() => {
+		if (filter === "All") return projectsArray;
+		return projectsArray.filter(
+			(p) => p.category === filter || p.category.split(", ").includes(filter),
+		);
+	}, [filter, projectsArray]);
 
 	return (
 		<section id="projects" className="section relative overflow-hidden">
@@ -355,67 +324,74 @@ function ProjectsPage() {
 				aria-hidden="true"
 			/>
 			<ParallaxOrbs />
-			<motion.div
-				className="container-x relative"
-				initial={{ opacity: 0 }}
-				animate={{ opacity: 1 }}
-				transition={{ duration: 0.8 }}
-			>
+			<div className="container-x relative">
+				{/* Header */}
 				<div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
 					<div className="max-w-2xl">
 						<Reveal>
 							<span className="eyebrow">Projects</span>
 						</Reveal>
 						<Reveal delay={100}>
-							<h2 className="mt-5 text-balance font-display text-4xl font-medium tracking-tight text-ink md:text-5xl">
+							<h1 className="mt-5 text-balance font-display text-4xl font-medium tracking-tight text-ink md:text-6xl">
 								Open source & client work that{" "}
-								<span className="serif-accent text-brand-dark">matters</span>.
-							</h2>
+								<span className="relative whitespace-nowrap">
+									<span className="serif-accent text-brand-dark">matters</span>
+									<span
+										className="absolute -bottom-1 left-0 h-[6px] w-full bg-accent/80"
+										aria-hidden="true"
+									/>
+								</span>
+								.
+							</h1>
 						</Reveal>
 						<Reveal delay={200}>
-							<p className="mt-5 text-lg text-ink-soft">
+							<p className="mt-6 max-w-xl text-lg text-ink-soft">
 								A curated collection of production systems, research prototypes,
-								and client deliveries across AI, data, and design. All code is
-								open source — fork, learn, contribute.
+								and client deliveries across AI, data, and design.
 							</p>
 						</Reveal>
 					</div>
 					<Reveal delay={250}>
 						<div className="flex flex-wrap gap-2">
-							{[
-								"All",
-								"Build",
-								"Grow",
-								"Brand",
-								"Research",
-								"Design",
-								"Engineering",
-							].map((filter) => (
+							{FILTERS.map((f) => (
 								<button
-									key={filter}
+									key={f}
 									type="button"
+									onClick={() => setFilter(f)}
 									className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
-										filter === "All"
+										filter === f
 											? "bg-ink-gradient text-white shadow-sm"
 											: "border border-hairline bg-surface text-ink-soft hover:border-brand hover:text-ink"
 									}`}
 								>
-									{filter}
+									{f}
 								</button>
 							))}
 						</div>
 					</Reveal>
 				</div>
 
-				<motion.div
-					className="mt-14"
-					initial={{ opacity: 0 }}
-					animate={{ opacity: 1 }}
-					transition={{ delay: 0.3, duration: 0.5 }}
-				>
-					{projectsArray.length > 0 ? (
-						<Suspense fallback={<ProjectCardSkeleton />}>
-							<ProjectGrid projects={projectsArray} />
+				{/* Continuous project-name ticker */}
+				<Reveal delay={100}>
+					<ProjectMarquee projects={projectsArray} />
+				</Reveal>
+
+				{/* Content */}
+				<div className="mt-4">
+					{filtered.length > 0 ? (
+						<Suspense
+							fallback={
+								<div className="space-y-6">
+									<ProjectSkeleton />
+									<ProjectSkeleton />
+								</div>
+							}
+						>
+							<motion.div layout className="space-y-6">
+								{filtered.map((project, i) => (
+									<ProjectRow key={project.id} project={project} index={i} />
+								))}
+							</motion.div>
 						</Suspense>
 					) : (
 						<div className="rounded-3xl border border-hairline bg-surface p-12 text-center">
@@ -424,7 +400,7 @@ function ProjectsPage() {
 								animate={{ scale: 1 }}
 								transition={{ type: "spring", damping: 15 }}
 							>
-								<Code className="mx-auto h-12 w-12 text-ink-muted/50" />
+								<Image className="mx-auto h-12 w-12 text-ink-muted/50" />
 								<h3 className="mt-4 font-display text-xl font-medium text-ink">
 									No projects yet
 								</h3>
@@ -434,14 +410,15 @@ function ProjectsPage() {
 							</motion.div>
 						</div>
 					)}
-				</motion.div>
+				</div>
 
 				{projectsArray.length > 0 && (
 					<motion.div
-						className="mt-16 text-center"
+						className="mt-20 text-center"
 						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ delay: 0.5 }}
+						whileInView={{ opacity: 1, y: 0 }}
+						viewport={{ once: true }}
+						transition={{ duration: 0.6 }}
 					>
 						<Reveal>
 							<p className="text-lg text-ink-soft">
@@ -455,12 +432,12 @@ function ProjectsPage() {
 								className="mt-6 inline-flex items-center gap-2 rounded-full bg-brand-gradient px-7 py-3.5 text-base font-semibold text-white shadow-lg shadow-brand/25 transition-all hover:shadow-xl hover:shadow-brand/35 hover:brightness-110"
 							>
 								Start a Project
-								<ArrowUpRight className="h-5 w-5" />
+								<ArrowRight className="h-5 w-5" />
 							</Link>
 						</Reveal>
 					</motion.div>
 				)}
-			</motion.div>
+			</div>
 		</section>
 	);
 }
