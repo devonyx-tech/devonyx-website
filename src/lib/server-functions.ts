@@ -1,5 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getPosts, getPost, getCareerJobs, getProjects } from "./notion";
+import {
+	getCareerJobBySlug,
+	getCareerJobs,
+	getPost,
+	getPosts,
+	getProjects,
+} from "./notion";
 
 export const getPostsFn = createServerFn({ method: "GET" }).handler(
 	async () => {
@@ -22,6 +28,16 @@ export const getCareerJobsFn = createServerFn({ method: "GET" }).handler(
 		return getCareerJobs();
 	},
 );
+
+export const getCareerJobBySlugFn = createServerFn({ method: "GET" })
+	.validator((data: { slug: string }) => data)
+	.handler(async ({ data }) => {
+		const job = await getCareerJobBySlug(data.slug);
+		if (!job) {
+			throw new Error("Not found");
+		}
+		return job;
+	});
 
 export const getProjectsFn = createServerFn({ method: "GET" }).handler(
 	async () => {

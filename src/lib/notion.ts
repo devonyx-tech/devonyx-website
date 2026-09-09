@@ -122,6 +122,7 @@ export async function getPost(slug: string) {
 
 export interface CareerJob {
 	id: string;
+	slug: string;
 	title: string;
 	reqId: string;
 	status: string;
@@ -144,6 +145,7 @@ function mapCareerJob(page: NotionPage): CareerJob {
 		| undefined;
 	return {
 		id: page.id,
+		slug: plainText(p.Slug?.rich_text ?? p.slug?.rich_text ?? []),
 		title: plainText(p.Title?.title ?? p.Name?.title),
 		reqId: reqId?.number?.toString() ?? "",
 		status: p.Status?.status?.name ?? p.Status?.select?.name ?? "",
@@ -191,7 +193,8 @@ export async function getCareerJobs() {
 		result.results = result.results.filter((page: NotionPage) => {
 			const status =
 				page.properties?.Status?.status?.name ??
-				(page.properties?.Status as { select?: { name?: string } } | undefined)?.select?.name ??
+				(page.properties?.Status as { select?: { name?: string } } | undefined)
+					?.select?.name ??
 				"";
 			return status === "Published";
 		});
@@ -214,6 +217,31 @@ export async function getCareerJobById(id: string) {
 		filter: {
 			property: "ID",
 			title: { equals: id },
+		},
+		page_size: 1,
+	});
+
+	const page = result.results[0];
+	if (!page) return null;
+	return mapCareerJob(page);
+}
+
+export async function getCareerJobBySlug(slug: string) {
+	if (!isNotionConfigured()) {
+		throw new Error("NOTION_TOKEN not configured");
+	}
+
+	if (!careersDataSourceId) {
+		throw new Error("NOTION_CAREERS_DATA_SOURCE_ID not configured");
+	}
+
+	const result = await notion.dataSources.query({
+		data_source_id: careersDataSourceId,
+		filter: {
+			and: [
+				{ property: "Status", status: { equals: "Published" } },
+				{ property: "Slug", rich_text: { equals: slug } },
+			],
 		},
 		page_size: 1,
 	});

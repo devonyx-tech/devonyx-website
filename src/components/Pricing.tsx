@@ -1,6 +1,7 @@
+import { ArrowRight, Check, Sparkles } from "lucide-react";
 import { useState } from "react";
-import { Check, ArrowRight, Sparkles } from "lucide-react";
 import { Reveal } from "../hooks";
+import PricingTable from "./PricingTable";
 
 const tabs = [
 	{
@@ -309,6 +310,8 @@ export default function Pricing() {
 						</Reveal>
 					))}
 				</div>
+
+				<PricingTable />
 
 				<Reveal delay={200}>
 					<p className="mt-10 flex items-center justify-center gap-2 text-center text-sm text-ink-muted">
