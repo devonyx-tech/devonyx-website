@@ -334,6 +334,50 @@ function BlogList({ posts }: { posts: Post[] }) {
 }
 
 export const Route = createFileRoute("/blog/")({
+	head: () => ({
+		title: "Blog — Devonyx | Design, Engineering & Growth Insights",
+		meta: [
+			{
+				name: "description",
+				content:
+					"Deep-dives on design, software engineering, and growth strategy from the Devonyx studio. Published from Notion, live here instantly.",
+			},
+			{
+				name: "keywords",
+				content:
+					"Devonyx blog, SaaS development tips, startup marketing, brand design, web development, performance marketing, SEO tips, tech blog",
+			},
+			{ property: "og:type", content: "website" },
+			{
+				property: "og:title",
+				content: "Blog — Devonyx | Design, Engineering & Growth Insights",
+			},
+			{
+				property: "og:description",
+				content:
+					"Deep-dives on design, software engineering, and growth strategy from the Devonyx studio.",
+			},
+			{ property: "og:url", content: "https://devonyx.in/blog" },
+			{ property: "og:image", content: "https://devonyx.in/og-image.png" },
+			{ name: "twitter:card", content: "summary_large_image" },
+			{
+				name: "twitter:title",
+				content: "Blog — Devonyx | Design, Engineering & Growth Insights",
+			},
+			{
+				name: "twitter:description",
+				content:
+					"Deep-dives on design, software engineering, and growth strategy from the Devonyx studio.",
+			},
+			{ name: "twitter:image", content: "https://devonyx.in/og-image.png" },
+		],
+		links: [
+			{
+				rel: "canonical",
+				href: "https://devonyx.in/blog",
+			},
+		],
+	}),
 	loader: async () => {
 		const posts = await getPostsFn();
 		return { posts };

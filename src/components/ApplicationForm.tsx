@@ -84,8 +84,9 @@ export default function ApplicationForm({
 						required
 						type="text"
 						defaultValue={initialRole}
+						disabled={!!initialRole}
 						placeholder="Select a role"
-						className="w-full rounded-xl border border-hairline bg-white px-4 py-3 text-sm text-ink placeholder:text-ink-faint shadow-xs outline-hidden transition-colors focus:border-brand focus:ring-2 focus:ring-brand/15"
+						className="w-full rounded-xl border border-hairline bg-white px-4 py-3 text-sm text-ink placeholder:text-ink-faint shadow-xs outline-hidden transition-colors focus:border-brand focus:ring-2 focus:ring-brand/15 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400"							
 					/>
 				</div>
 				<div>

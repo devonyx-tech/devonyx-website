@@ -21,6 +21,50 @@ import { getProjectsFn } from "@/lib/server-functions";
 import { Reveal } from "../hooks";
 
 export const Route = createFileRoute("/projects")({
+	head: () => ({
+		title: "Projects — Devonyx | Open Source & Client Work",
+		meta: [
+			{
+				name: "description",
+				content:
+					"A curated collection of production systems, research prototypes, and client deliveries across AI, data, and design. See what Devonyx builds.",
+			},
+			{
+				name: "keywords",
+				content:
+					"Devonyx projects, SaaS case studies, web app portfolio, AI projects, client work, open source projects, digital agency portfolio",
+			},
+			{ property: "og:type", content: "website" },
+			{
+				property: "og:title",
+				content: "Projects — Devonyx | Open Source & Client Work",
+			},
+			{
+				property: "og:description",
+				content:
+					"A curated collection of production systems, research prototypes, and client deliveries across AI, data, and design.",
+			},
+			{ property: "og:url", content: "https://devonyx.in/projects" },
+			{ property: "og:image", content: "https://devonyx.in/og-image.png" },
+			{ name: "twitter:card", content: "summary_large_image" },
+			{
+				name: "twitter:title",
+				content: "Projects — Devonyx | Open Source & Client Work",
+			},
+			{
+				name: "twitter:description",
+				content:
+					"A curated collection of production systems, research prototypes, and client deliveries.",
+			},
+			{ name: "twitter:image", content: "https://devonyx.in/og-image.png" },
+		],
+		links: [
+			{
+				rel: "canonical",
+				href: "https://devonyx.in/projects",
+			},
+		],
+	}),
 	loader: async () => {
 		try {
 			const projects = await getProjectsFn();

@@ -13,6 +13,50 @@ import { getCareerJobsFn } from "@/lib/server-functions";
 import { Reveal } from "../hooks";
 
 export const Route = createFileRoute("/careers/")({
+	head: () => ({
+		title: "Careers — Devonyx | Join Our Remote-First Team",
+		meta: [
+			{
+				name: "description",
+				content:
+					"Join Devonyx — a small, remote-first team working across 5 regions. We're hiring developers, marketers, and designers who love shipping real products with founders.",
+			},
+			{
+				name: "keywords",
+				content:
+					"Devonyx careers, remote jobs, startup jobs, developer jobs, marketing jobs, design jobs, work from home, digital agency careers",
+			},
+			{ property: "og:type", content: "website" },
+			{
+				property: "og:title",
+				content: "Careers — Devonyx | Join Our Remote-First Team",
+			},
+			{
+				property: "og:description",
+				content:
+					"Join Devonyx — a small, remote-first team working across 5 regions. We're hiring developers, marketers, and designers.",
+			},
+			{ property: "og:url", content: "https://devonyx.in/careers" },
+			{ property: "og:image", content: "https://devonyx.in/og-image.png" },
+			{ name: "twitter:card", content: "summary_large_image" },
+			{
+				name: "twitter:title",
+				content: "Careers — Devonyx | Join Our Remote-First Team",
+			},
+			{
+				name: "twitter:description",
+				content:
+					"Join Devonyx — a small, remote-first team working across 5 regions. We're hiring.",
+			},
+			{ name: "twitter:image", content: "https://devonyx.in/og-image.png" },
+		],
+		links: [
+			{
+				rel: "canonical",
+				href: "https://devonyx.in/careers",
+			},
+		],
+	}),
 	loader: async () => {
 		const jobs = await getCareerJobsFn();
 		return { jobs: jobs || [] };

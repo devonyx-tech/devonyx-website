@@ -233,6 +233,39 @@ function Blocks({
 }
 
 export const Route = createFileRoute("/blog/$slug")({
+	head: () => ({
+		title: "Blog Post — Devonyx",
+		meta: [
+			{
+				name: "description",
+				content:
+					"Read insights on design, engineering, and growth from the Devonyx studio.",
+			},
+			{ name: "keywords", content: "Devonyx, blog, startup, SaaS, development" },
+			{ property: "og:type", content: "article" },
+			{ property: "og:title", content: "Blog Post — Devonyx" },
+			{
+				property: "og:description",
+				content:
+					"Read insights on design, engineering, and growth from the Devonyx studio.",
+			},
+			{ property: "og:image", content: "https://devonyx.in/og-image.png" },
+			{ name: "twitter:card", content: "summary_large_image" },
+			{ name: "twitter:title", content: "Blog Post — Devonyx" },
+			{
+				name: "twitter:description",
+				content:
+					"Read insights on design, engineering, and growth from the Devonyx studio.",
+			},
+			{ name: "twitter:image", content: "https://devonyx.in/og-image.png" },
+		],
+		links: [
+			{
+				rel: "canonical",
+				href: "https://devonyx.in/blog",
+			},
+		],
+	}),
 	loader: async ({ params }) => {
 		const post = await getPostFn({ data: { slug: params.slug } });
 		if (!post) {

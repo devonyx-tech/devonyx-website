@@ -1,4 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import Markdown from 'react-markdown'
+import remarkGfm from "remark-gfm"
 import {
 	ArrowLeft,
 	ArrowUpRight,
@@ -15,6 +17,42 @@ import ApplicationForm from "@/components/ApplicationForm";
 import { getCareerJobBySlugFn } from "@/lib/server-functions";
 
 export const Route = createFileRoute("/careers/$slug")({
+	head: () => ({
+		title: "Job Opening — Devonyx Careers",
+		meta: [
+			{
+				name: "description",
+				content:
+					"Join Devonyx — a remote-first digital agency. Apply for open positions in development, marketing, and design across 5 regions.",
+			},
+			{
+				name: "keywords",
+				content: "Devonyx careers, remote job, startup job, developer job, marketing job, design job",
+			},
+			{ property: "og:type", content: "website" },
+			{ property: "og:title", content: "Job Opening — Devonyx Careers" },
+			{
+				property: "og:description",
+				content:
+					"Join Devonyx — a remote-first digital agency. Apply for open positions across 5 regions.",
+			},
+			{ property: "og:image", content: "https://devonyx.in/og-image.png" },
+			{ name: "twitter:card", content: "summary_large_image" },
+			{ name: "twitter:title", content: "Job Opening — Devonyx Careers" },
+			{
+				name: "twitter:description",
+				content:
+					"Join Devonyx — a remote-first digital agency. Apply for open positions across 5 regions.",
+			},
+			{ name: "twitter:image", content: "https://devonyx.in/og-image.png" },
+		],
+		links: [
+			{
+				rel: "canonical",
+				href: "https://devonyx.in/careers",
+			},
+		],
+	}),
 	loader: async ({ params }) => {
 		const job = await getCareerJobBySlugFn({ data: { slug: params.slug } });
 		return { job };
@@ -119,12 +157,12 @@ function JobPostingPage() {
 						</div>
 
 						<div className="mt-8 rounded-3xl border border-hairline bg-surface p-7 md:p-8">
-							<h2 className="font-display text-xl font-medium text-ink">
-								About the role
-							</h2>
-							<p className="mt-4 text-ink-soft leading-relaxed whitespace-pre-wrap">
+							<div className="prose prose-sm max-w-none">
+							<Markdown remarkPlugins={[remarkGfm]}>
 								{job.description || "No description available."}
-							</p>
+							</Markdown>
+							</div>
+							
 						</div>
 
 						<div className="mt-6 flex flex-wrap items-center gap-4">

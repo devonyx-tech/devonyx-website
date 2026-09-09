@@ -21,7 +21,16 @@ const config = defineConfig({
 		}),
 		nitro({ rollupConfig: { external: [/^@sentry\//] } }),
 		tailwindcss(),
-		tanstackStart(),
+		tanstackStart({
+			prerender:{
+				enabled:true,
+				crawlLinks: true
+			},
+			sitemap:{
+				enabled:true,
+				host: "https://devonyx.in",
+			}
+		}),
 		viteReact(),
 		babel({ presets: [reactCompilerPreset()] }),
 		// netlify(),

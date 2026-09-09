@@ -178,17 +178,19 @@ export default function Footer() {
 						© {new Date().getFullYear()} Devonyx. All rights reserved.
 					</p>
 					<div className="flex flex-wrap items-center justify-center gap-6">
-						{["Privacy Policy", "Terms of Service", "Cookie Policy"].map(
-							(link) => (
-								<a
-									key={link}
-									href="/legal"
-									className="text-xs text-white/50 transition-colors hover:text-white"
-								>
-									{link}
-								</a>
-							),
-						)}
+						{[
+							{ label: "Privacy Policy", href: "/privacy" },
+							{ label: "Terms of Service", href: "/terms" },
+							{ label: "Cookie Policy", href: "/cookies" },
+						].map((link) => (
+							<a
+								key={link.label}
+								href={link.href}
+								className="text-xs text-white/50 transition-colors hover:text-white"
+							>
+								{link.label}
+							</a>
+						))}
 					</div>
 				</div>
 			</div>
